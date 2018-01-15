@@ -1,0 +1,10 @@
+---
+
+- name: Allow ansible from sudoers
+  lineinfile:
+    dest: /etc/sudoers
+    regexp: '^ansible'
+    insertafter: "^# %wheel"
+    line: "ansible ALL=(ALL) NOPASSWD:ALL"
+    state: present
+    validate: '/usr/sbin/visudo -cf %s'

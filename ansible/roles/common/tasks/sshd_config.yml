@@ -1,0 +1,32 @@
+---
+
+- name: Allow ansible from sshd_config
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    line: "AllowUsers ansible"
+    state: present
+
+- name: Allow {{ initial_user }} from sshd_config
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    line: "AllowUsers {{ initial_user }}"
+    state: present
+
+#- name: Allow Password authentication from sshd_config -1
+#  lineinfile:
+#    path: /etc/ssh/sshd_config
+#    regexp: '^#PasswordAuthentication yes'
+#    line: "PasswordAuthentication yes"
+#    state: present
+
+#- name: Allow Password authentication from sshd_config -2
+#  lineinfile:
+#    path: /etc/ssh/sshd_config
+#    regexp: '^PasswordAuthentication no'
+#    line: "#PasswordAuthentication no"
+#    state: present
+
+- name: Reload ssh service
+  service:
+    name: sshd
+    state: reloaded

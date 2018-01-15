@@ -1,0 +1,87 @@
+{
+
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_access_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
+    "aws_region": "{{env `AWS_REGION`}}",
+    "vpc": "{{env `VPC_ID`}}",
+    "subnet": "{{env `SUBNET_ID`}}",
+    "security_group_id": "{{env `SECURITY_GROUP_ID`}}",
+    "ami_name": "CentOS 7 AMI for infrastructure provisioning {{timestamp}}"
+  },
+  "builders": [
+    {
+      "name": "AWS AMI Builder",
+      "type": "amazon-ebs",
+      "communicator": "ssh",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_access_key`}}",
+      "region": "{{user `aws_region`}}",
+      "vpc_id": "{{user `vpc`}}",
+      "subnet_id": "{{user `subnet`}}",
+      "security_group_id": "{{user `security_group_id`}}",
+      "instance_type": "m4.large",
+      "ssh_username": "centos",
+      "ami_name": "ami-centos7-{{timestamp}}",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "root-device-type": "ebs",
+          "name": "*CentOS Linux 7 x86_64 HVM EBS*"
+        },
+        "most_recent": true
+      },
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/sda1",
+          "volume_size": 20,
+          "volume_type": "gp2",
+          "delete_on_termination": true
+        }
+      ],
+      "ami_block_device_mappings": [
+        {
+          "device_name": "/dev/sdb",
+          "delete_on_termination": true,
+          "volume_size": 4,
+          "volume_type": "gp2"
+        },
+        {
+          "device_name": "/dev/sdc",
+          "delete_on_termination": true,
+          "volume_size": 10,
+          "volume_type": "gp2"
+        }
+      ],
+      "tags": {
+        "Name": "CentOS 7 AMI",
+        "OS_Version": "CentOS 7",
+        "Release": "Packer Golden AMI"
+      },
+      "run_tags": {
+        "Name": "{{user `ami_name`}}"
+      },
+      "run_volume_tags": {
+        "Name": "{{user `ami_name`}}"
+      },
+      "snapshot_tags": {
+        "Name": "{{user `ami_name`}}"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "scripts/base_initial.sh"
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "ansible/site.yml",
+      "role_paths": [
+        "ansible/roles/common"
+      ],
+      "playbook_dir": "ansible"
+    }
+  ]
+
+}

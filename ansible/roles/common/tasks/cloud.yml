@@ -1,0 +1,8 @@
+---
+
+- name: Allow ssh_pwauth
+  lineinfile:
+    path: /etc/cloud/cloud.cfg
+    regexp: '^ssh_pwauth'
+    line: "ssh_pwauth: True"
+    state: present

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Parameters are:
+#   Account name.
+#   Role name.
+
+set -e
+set -o pipefail
+
+account=${1:?"Missing account name"}
+role_name=${2:?"Missing role name"}
+shift 2
+
+function export_credentials() {
+    awk '/CREDENTIALS/{printf "export AWS_ACCESS_KEY_ID=\"%s\"\nexport AWS_SECRET_ACCESS_KEY=\"%s\"\nexport AWS_SECURITY_TOKEN=\"%s\"\n", $2, $4, $5}'
+}
+
+(
+	set -e
+	set -o pipefail
+
+	account_number=$(./map-account-number $account)
+	[ -n "$account_number" ]
+	account_name=$(./map-account-name $account)
+	[ -n "$account_name" ]
+	echo Account $account_name $account_number
+	aws sts assume-role \
+		--role-arn arn:aws:iam::$account_number:role/${role_name:?} \
+		--role-session-name "$(whoami)" \
+		--output text | \
+	export_credentials > /tmp/credentials-$$
+	echo export account=$account_name >> /tmp/credentials-$$
+	echo export account_name=$(./map-account-name $account_name) >> /tmp/credentials-$$
+	echo export account_number=$(./map-account-number $account_name) >> /tmp/credentials-$$
+)
+
+[ ! -s /tmp/credentials-$$ ] || source /tmp/credentials-$$
+rm -f /tmp/credentials-$$

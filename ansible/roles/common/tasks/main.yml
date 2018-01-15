@@ -1,0 +1,8 @@
+---
+
+- import_tasks: packages.yml
+- import_tasks: motd.yml
+- import_tasks: cloud.yml
+- import_tasks: users_groups.yml
+- import_tasks: sudoers.yml
+- import_tasks: sshd_config.yml

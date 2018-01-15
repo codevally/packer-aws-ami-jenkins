@@ -1,0 +1,6 @@
+---
+
+- name: Update motd file with basic banner
+  copy:
+    content: "\n********* Basic AMI built by Packer *********\n"
+    dest: /etc/motd

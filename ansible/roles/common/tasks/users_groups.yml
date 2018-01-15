@@ -1,0 +1,25 @@
+---
+
+- name: Adding base groups
+  group:
+    name: "{{ item.group_name }}"
+    gid: "{{ item.group_id }}"
+    state: present
+  with_items:
+    - "{{ base_groups | default([]) }}"
+
+- debug:
+    msg: "{{ item }}"
+  with_items: "{{ base_users }}"
+
+- name: Adding base users
+  user:
+    name: "{{ item.user_name }}"
+    uid: "{{ item.user_id | default(omit) }}"
+    group: "{{ item.group if item.group is defined else item.user_name }}"
+    groups: "{{ item.groups if item.groups is defined else ''}}"
+    password: "{{ item.password | default(omit) }}"
+    state: present
+  with_items:
+    - "{{ base_users | default([]) }}"
+

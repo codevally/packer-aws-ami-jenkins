@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Parameters are:
+#   Account name.
+
+set -e
+set -o pipefail
+
+account=${1:?"Missing account name"}
+source ./sts-assume-role "$account" admin-role

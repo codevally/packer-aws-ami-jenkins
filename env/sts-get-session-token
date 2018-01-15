@@ -1,0 +1,40 @@
+#!/bin/bash
+# The first parameter is the MFA value or the empty string ('').  If it is the
+# empty string then this script assumes that the user does not have an MFA.
+
+set -e
+set -o pipefail
+
+function export_credentials() {
+    awk '/CREDENTIALS/{printf "export AWS_ACCESS_KEY_ID=\"%s\"\nexport AWS_SECRET_ACCESS_KEY=\"%s\"\nexport AWS_SECURITY_TOKEN=\"%s\"\n", $2, $4, $5}'
+}
+
+: ${ARN_BASE='arn:aws:iam::0000000:mfa'}
+
+user="${STS_USER?"Missing STS user"}"
+
+token="${1?"Missing MFA token"}"
+
+: ${STS_USER="$(whoami)"}
+
+echo "Token $token"
+
+if [ -z "$token" ]
+then
+	mfa=
+else
+	mfa="--serial-number $ARN_BASE/$STS_USER --token-code $token"
+fi
+
+# Unset any existing session variables first.
+
+eval $(env | sed -ne '/^AWS/{s/=.*//; s/^/unset /; p;}')
+
+echo "User $STS_USER"
+aws sts get-session-token $mfa --output text | \
+    export_credentials > /tmp/credentials-$$
+
+
+[ ! -s /tmp/credentials-$$ ] || source /tmp/credentials-$$
+rm -f /tmp/credentials-$$
+

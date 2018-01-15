@@ -1,0 +1,31 @@
+---
+# vars file for common
+
+base_packages: ["wget","vim","telnet","bind-utils","bzip2","psmisc","yum-utils","device-mapper-persistent-data","iotop","curl","lsof","net-tools"]
+
+remove_packages: ["wpa_supplicant","alsa","avahi","NetworkManager","cups","btrfs-progs"]
+
+initial_user: "centos"
+
+base_groups:
+  - group_name: jboss
+    group_id: 503
+  - group_name: admin
+    group_id: 1500
+  - group_name: ansible
+    group_id: 2000
+
+base_users:
+  - user_name: jboss
+    group: jboss
+    user_id: 503
+  - user_name: admin
+    group: admin
+    groups: wheel,root
+    user_id: 1500
+    password: "PASSWORD"
+  - user_name: ansible
+    group: ansible
+    user_id: 2000
+    password: "PASSWORD"
+

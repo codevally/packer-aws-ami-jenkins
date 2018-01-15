@@ -1,0 +1,17 @@
+---
+
+- name: Intall base packages
+  yum:
+    name: "{{ item }}"
+    state: present
+    disable_gpg_check: yes
+  with_items:
+    "{{ base_packages }}"
+
+- name: Remove unnecessary packages
+  yum:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    "{{ remove_packages }}"
+

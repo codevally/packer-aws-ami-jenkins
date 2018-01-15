@@ -1,0 +1,62 @@
+{
+
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_access_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
+    "region": "ap-southeast-2"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "{{user `region`}}",
+      "instance_type": "m4.large",
+      "ssh_username": "ec2-user",
+      "ami_name": "ami-rhel7-{{timestamp}}",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "root-device-type": "ebs",
+          "name": "*RHEL-7.4_HVM_GA-*-x86_64-*"
+        },
+        "owners": ["309956199498"],
+        "most_recent": true
+      },
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/sda1",
+          "volume_size": 20,
+          "volume_type": "gp2",
+          "delete_on_termination": true
+        }
+      ],
+      "ami_block_device_mappings": [
+        {
+          "device_name": "/dev/sdb",
+          "delete_on_termination": true,
+          "volume_size": 4
+        },
+        {
+          "device_name": "/dev/sdc",
+          "delete_on_termination": true,
+          "volume_size": 10
+        }
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["sleep 10"]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo yum update -y",
+        "sudo yum install telnet -y"
+      ]
+    }
+  ]
+
+}
